@@ -1,5 +1,6 @@
 import HabitCard from '@/components/HabitCard';
 import HabitGreeting from '@/components/HabitGreeting';
+import Screen from '@/components/Screen';
 import { StyleSheet, View } from 'react-native';
 
 
@@ -31,12 +32,14 @@ export default function HomeScreen() {
     //   <Text style={styles.text}>{saludo}</Text>
     //   <Link href="/(tabs)/about">About me</Link>
     // </View>
+    <Screen>
     <View style={styles.container}>
       <HabitGreeting name={name} />
       {habits.map((habit) => (
         <HabitCard key={habit.title} title={habit.title} streak={habit.streak} isCompleted={habit.isCompleted} />
       ))}
     </View>
+    </Screen>
   );
 }
 
