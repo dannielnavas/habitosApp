@@ -1,11 +1,12 @@
-import { StyleSheet, View } from "react-native";
+import { StyleSheet } from "react-native";
+import { ThemedView } from "./themed-view";
 
 type Props = {
     children: React.ReactNode;
 }
 
 export default function Screen({ children }: Props) {
-    return <View style={styles.screen}>{children}</View>;
+    return <ThemedView style={styles.screen}>{children}</ThemedView>;
 }
 
 const styles = StyleSheet.create({

@@ -1,11 +1,12 @@
 import HabitCard from '@/components/HabitCard';
 import HabitGreeting from '@/components/HabitGreeting';
+import ProfileHeader from '@/components/ProfileHeader';
 import Screen from '@/components/Screen';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet } from 'react-native';
 
 
 export default function HomeScreen() {
-  const name = 'Daniel';
+  const name = 'Daniel Navas';
   const age = 35;
   const isDeveloper = true;
   const hobbies = ['Programar', 'Jugar', 'Ver peliculas'];
@@ -33,12 +34,13 @@ export default function HomeScreen() {
     //   <Link href="/(tabs)/about">About me</Link>
     // </View>
     <Screen>
-    <View style={styles.container}>
+      {/* <View style={styles.container}> */}
+        <ProfileHeader name={name} role="Desarrollador" />
       <HabitGreeting name={name} />
       {habits.map((habit) => (
         <HabitCard key={habit.title} title={habit.title} streak={habit.streak} isCompleted={habit.isCompleted} />
       ))}
-    </View>
+    {/* </View> */}
     </Screen>
   );
 }

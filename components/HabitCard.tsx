@@ -1,4 +1,5 @@
 import { StyleSheet, Text, View } from "react-native";
+import { ThemedText } from "./themed-text";
 
 type Props = {
     title: string;
@@ -26,13 +27,13 @@ export default function HabitCard({ title, streak, isCompleted = false, priority
     return (
         <View style={[styles.card, isCompleted && styles.cardDone]}>
             <View style={styles.row}>
-                <Text style={styles.title}>{title}</Text>
+                <ThemedText style={styles.title}>{title}</ThemedText>
 
 
-                <Text style={[styles.badge, { color: priorityColor?.color, backgroundColor: priorityColor?.backgroundColor }]}>{priority.toUpperCase()}</Text>
+                <ThemedText style={[styles.badge, { color: priorityColor?.color, backgroundColor: priorityColor?.backgroundColor }]}>{priority.toUpperCase()}</ThemedText>
             </View>
             <View style={styles.row}>
-                {isCompleted && <Text style={styles.badge}>✔️ Hoy</Text>}
+                {isCompleted && <ThemedText style={styles.badge}>✔️ Hoy</ThemedText>}
                 <Text style={styles.streakDone}>🔥 {streak} días seguidos</Text>
             </View>
         </View>
