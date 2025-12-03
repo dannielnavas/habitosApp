@@ -1,4 +1,5 @@
-import { StyleSheet, Text, View } from "react-native";
+import { useThemeColor } from "@/hooks/use-theme-color";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { ThemedText } from "./themed-text";
 
 type Props = {
@@ -6,6 +7,7 @@ type Props = {
     streak: number;
     isCompleted?: boolean;
     priority?: 'low' | 'medium' | 'high';
+    onToggle: () => void;
 }
 
 const priorityColors = {
@@ -22,10 +24,14 @@ const priorityColors = {
         color: '#9f1239',
     },
 };
-export default function HabitCard({ title, streak, isCompleted = false, priority = 'low' }: Props) {
+export default function HabitCard({ title, streak, isCompleted = false, priority = 'low', onToggle }: Props) {
+    const surface = useThemeColor({}, 'surface');
+    const success = useThemeColor({}, 'success');
+    const border = useThemeColor({}, 'border');
+
     const priorityColor = priorityColors[priority];
     return (
-        <View style={[styles.card, isCompleted && styles.cardDone]}>
+        <Pressable onPress={onToggle} style={({ pressed }) => [styles.card, { backgroundColor: surface, opacity: pressed ? 0.96 : 1, borderColor: isCompleted ? success : border }]}>
             <View style={styles.row}>
                 <ThemedText style={styles.title}>{title}</ThemedText>
 
@@ -36,7 +42,7 @@ export default function HabitCard({ title, streak, isCompleted = false, priority
                 {isCompleted && <ThemedText style={styles.badge}>✔️ Hoy</ThemedText>}
                 <Text style={styles.streakDone}>🔥 {streak} días seguidos</Text>
             </View>
-        </View>
+        </Pressable>
     );
 }
 
@@ -52,7 +58,7 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 2 },
         elevation: 2,
         width: '100%',
-        maxWidth: 290,
+        // maxWidth: 290,
         alignSelf: 'center',
     },
     cardDone: {
