@@ -1,11 +1,11 @@
 import HabitCard from '@/components/HabitCard';
 import HabitGreeting from '@/components/HabitGreeting';
+import PrimaryButton from '@/components/PrimaryButton';
 import ProfileHeader from '@/components/ProfileHeader';
 import Screen from '@/components/Screen';
-import { ThemedText } from '@/components/themed-text';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useCallback, useMemo, useState } from 'react';
-import { Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { ScrollView, StyleSheet, TextInput, View } from 'react-native';
 
 type Habit = {
   id: string;
@@ -79,17 +79,22 @@ export default function HomeScreen() {
           onChangeText={setNuevo}
           onSubmitEditing={addHabilt}
         />
-        <Pressable
+        {/* <Pressable
           style={[styles.addBtn, { backgroundColor: primary }]}
           onPress={addHabilt}
         >
           <ThemedText>Agregar</ThemedText>
-        </Pressable>
+        </Pressable> */}
+        <PrimaryButton title='Agregar' onPress={addHabilt} />
       </View>
-      {items.map((habit) => (
-        <HabitCard key={habit.id} title={habit.title} streak={habit.streak} isCompleted={habit.isCompleted} priority={habit.priority} onToggle={() => handleToggle(habit.id)} />
-      ))}
+      <ScrollView contentContainerStyle={{ paddingBottom: 32, gap: 12 }} showsVerticalScrollIndicator={false}>
+        {items.map((habit) => (
+          <HabitCard key={habit.id} title={habit.title} streak={habit.streak} isCompleted={habit.isCompleted} priority={habit.priority} onToggle={() => handleToggle(habit.id)} />
+        ))}
+      </ScrollView>
+
       {/* </View> */}
+
     </Screen>
   );
 }
