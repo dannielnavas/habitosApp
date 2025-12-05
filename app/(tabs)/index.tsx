@@ -3,9 +3,11 @@ import HabitGreeting from '@/components/HabitGreeting';
 import PrimaryButton from '@/components/PrimaryButton';
 import ProfileHeader from '@/components/ProfileHeader';
 import Screen from '@/components/Screen';
+import { ThemedText } from '@/components/themed-text';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useCallback, useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { FlatList, ListRenderItemInfo, StyleSheet, TextInput, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type Habit = {
   id: string;
@@ -26,6 +28,7 @@ const INITIAL_HABITS: Habit[] = [
 export default function HomeScreen() {
   const [items, setItems] = useState<Habit[]>(INITIAL_HABITS);
   const [nuevo, setNuevo] = useState<string>('');
+  const insets = useSafeAreaInsets();
 
   const border = useThemeColor({}, 'border');
   const surface = useThemeColor({}, 'surface');
@@ -56,6 +59,14 @@ export default function HomeScreen() {
   const total = items.length;
   const completed = useMemo(() => items.filter(h => h.isCompleted).length, [items]) // guarda en la memoria el resultado de la funcion
 
+  const keyExtractor = useCallback((item: Habit) => item.id, [])
+  const renderItem = useCallback(({ item }: ListRenderItemInfo<Habit>) => (
+    <HabitCard key={item.id} title={item.title} streak={item.streak} isCompleted={item.isCompleted} priority={item.priority} onToggle={() => handleToggle(item.id)} />
+  ), [handleToggle])
+
+  const itemSeoarator = () => <View style={{ height: 12 }} />
+
+  const empty = () => <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><ThemedText>No hay habilidades</ThemedText></View>
 
   return (
     // <View style={styles.container}>
@@ -87,11 +98,25 @@ export default function HomeScreen() {
         </Pressable> */}
         <PrimaryButton title='Agregar' onPress={addHabilt} />
       </View>
-      <ScrollView contentContainerStyle={{ paddingBottom: 32, gap: 12 }} showsVerticalScrollIndicator={false}>
+      <FlatList
+        data={items}
+        keyExtractor={keyExtractor}
+        renderItem={renderItem}
+        ItemSeparatorComponent={itemSeoarator}
+        ListEmptyComponent={empty}
+        contentContainerStyle={{
+          paddingVertical: 16,
+          paddingBottom: insets.bottom + 16,
+        }}
+        initialNumToRender={5}
+        windowSize={10}
+        showsVerticalScrollIndicator={false}
+      />
+      {/* <ScrollView contentContainerStyle={{ paddingBottom: 32, gap: 12 }} showsVerticalScrollIndicator={false}>
         {items.map((habit) => (
           <HabitCard key={habit.id} title={habit.title} streak={habit.streak} isCompleted={habit.isCompleted} priority={habit.priority} onToggle={() => handleToggle(habit.id)} />
         ))}
-      </ScrollView>
+      </ScrollView> */}
 
       {/* </View> */}
 
