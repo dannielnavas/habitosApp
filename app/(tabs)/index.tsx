@@ -4,6 +4,7 @@ import PrimaryButton from '@/components/PrimaryButton';
 import ProfileHeader from '@/components/ProfileHeader';
 import Screen from '@/components/Screen';
 import { ThemedText } from '@/components/themed-text';
+import { useHabits } from '@/context/HabitsContext';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useCallback, useMemo, useState } from 'react';
 import { FlatList, ListRenderItemInfo, StyleSheet, TextInput, View } from 'react-native';
@@ -26,6 +27,7 @@ const INITIAL_HABITS: Habit[] = [
 ];
 
 export default function HomeScreen() {
+  const { loading, habits, addHabit, toggleHabit } = useHabits();
   const [items, setItems] = useState<Habit[]>(INITIAL_HABITS);
   const [nuevo, setNuevo] = useState<string>('');
   const insets = useSafeAreaInsets();
@@ -49,20 +51,38 @@ export default function HomeScreen() {
     }).sort((a, b) => b.streak - a.streak))
   }, [])
 
-  const addHabilt = useCallback(() => {
+  const onAddHabit = useCallback(() => {
     const title = nuevo.trim();
     if (!title) return;
-    setItems(prev => [...prev, { id: Math.random().toString(), title, streak: 0, isCompleted: false, priority: 'low' }])
+    addHabit(title);
     setNuevo('');
-  }, [nuevo])
+  }, [nuevo, addHabit])
 
-  const total = items.length;
-  const completed = useMemo(() => items.filter(h => h.isCompleted).length, [items]) // guarda en la memoria el resultado de la funcion
+  // const addHabilt = useCallback(() => {
+  //   const title = nuevo.trim();
+  //   if (!title) return;
+  //   setItems(prev => [...prev, { id: Math.random().toString(), title, streak: 0, isCompleted: false, priority: 'low' }])
+  //   setNuevo('');
+  // }, [nuevo])
 
-  const keyExtractor = useCallback((item: Habit) => item.id, [])
-  const renderItem = useCallback(({ item }: ListRenderItemInfo<Habit>) => (
-    <HabitCard key={item.id} title={item.title} streak={item.streak} isCompleted={item.isCompleted} priority={item.priority} onToggle={() => handleToggle(item.id)} />
-  ), [handleToggle])
+  const total = habits.length;
+  const completed = useMemo(() => habits.filter(h => h.lastDoneAt).length, [habits]) // guarda en la memoria el resultado de la funcion
+
+  const keyExtractor = useCallback((habit: Habit) => habit.id, [])
+  const renderItem = ({ item }: ListRenderItemInfo<any>) => {
+    const isToday = item.lastDoneAt
+      ? new Date(item.lastDoneAt).toDateString() === new Date().toDateString()
+      : false;
+    return (
+      <HabitCard
+        title={item.title}
+        streak={item.streak}
+        isCompleted={isToday}
+        priority={item.priority}
+        onToggle={() => toggleHabit(item.id)}
+      />
+    );
+  };
 
   const itemSeoarator = () => <View style={{ height: 12 }} />
 
@@ -88,7 +108,7 @@ export default function HomeScreen() {
           placeholder='Agregar nueva habilidad'
           value={nuevo}
           onChangeText={setNuevo}
-          onSubmitEditing={addHabilt}
+          onSubmitEditing={onAddHabit}
         />
         {/* <Pressable
           style={[styles.addBtn, { backgroundColor: primary }]}
@@ -96,11 +116,10 @@ export default function HomeScreen() {
         >
           <ThemedText>Agregar</ThemedText>
         </Pressable> */}
-        <PrimaryButton title='Agregar' onPress={addHabilt} />
+        <PrimaryButton title='Agregar' onPress={onAddHabit} />
       </View>
       <FlatList
-        data={items}
-        keyExtractor={keyExtractor}
+        data={habits}
         renderItem={renderItem}
         ItemSeparatorComponent={itemSeoarator}
         ListEmptyComponent={empty}
