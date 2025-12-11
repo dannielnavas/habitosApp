@@ -4,33 +4,41 @@ import PrimaryButton from '@/components/PrimaryButton';
 import ProfileHeader from '@/components/ProfileHeader';
 import Screen from '@/components/Screen';
 import { ThemedText } from '@/components/themed-text';
+import { useCelebration } from '@/context/CelebrationProvider';
 import { useHabits } from '@/context/HabitsContext';
 import { useThemeColor } from '@/hooks/use-theme-color';
+import { getMotivation } from '@/services/motivation';
+import { Habit } from '@/types/habits';
+import { isSameDay } from '@/utils/date';
 import { useCallback, useMemo, useState } from 'react';
 import { FlatList, ListRenderItemInfo, StyleSheet, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-type Habit = {
-  id: string;
-  title: string;
-  streak: number;
-  isCompleted: boolean;
-  priority: 'low' | 'medium' | 'high';
-}
-const INITIAL_HABITS: Habit[] = [
-  { id: '1', title: 'Leer', streak: 10, isCompleted: true, priority: 'low' },
-  { id: '2', title: 'Ejercitarse', streak: 5, isCompleted: false, priority: 'medium' },
-  { id: '3', title: 'Dormir temprano', streak: 7, isCompleted: true, priority: 'high' },
-  { id: '4', title: 'Comer saludable', streak: 3, isCompleted: false, priority: 'low' },
-  { id: '5', title: 'Beber agua', streak: 2, isCompleted: true, priority: 'medium' },
-  { id: '6', title: 'Meditar', streak: 1, isCompleted: false, priority: 'low' },
-];
+// type Habit = {
+//   id: string;
+//   title: string;
+//   streak: number;
+//   isCompleted: boolean;
+//   priority: 'low' | 'medium' | 'high';
+// }
+// const INITIAL_HABITS: Habit[] = [
+//   { id: '1', title: 'Leer', streak: 10, isCompleted: true, priority: 'low' },
+//   { id: '2', title: 'Ejercitarse', streak: 5, isCompleted: false, priority: 'medium' },
+//   { id: '3', title: 'Dormir temprano', streak: 7, isCompleted: true, priority: 'high' },
+//   { id: '4', title: 'Comer saludable', streak: 3, isCompleted: false, priority: 'low' },
+//   { id: '5', title: 'Beber agua', streak: 2, isCompleted: true, priority: 'medium' },
+//   { id: '6', title: 'Meditar', streak: 1, isCompleted: false, priority: 'low' },
+// ];
+
+export type HabitItem = ReturnType<typeof useHabits>['habits'][number];
 
 export default function HomeScreen() {
   const { loading, habits, addHabit, toggleHabit } = useHabits();
-  const [items, setItems] = useState<Habit[]>(INITIAL_HABITS);
+  // const [items, setItems] = useState<Habit[]>(INITIAL_HABITS);
   const [nuevo, setNuevo] = useState<string>('');
   const insets = useSafeAreaInsets();
+
+  const { celebrate } = useCelebration();
 
   const border = useThemeColor({}, 'border');
   const surface = useThemeColor({}, 'surface');
@@ -39,17 +47,17 @@ export default function HomeScreen() {
   const text = useThemeColor({}, 'text');
   const muted = useThemeColor({}, 'muted');
 
-  const handleToggle = useCallback((id: string) => {
-    setItems(prev => prev.map(h => {
-      if (h.id !== id) return h;
-      const completed = !h.isCompleted;
-      return {
-        ...h,
-        isCompleted: completed,
-        streak: completed ? h.streak + 1 : Math.max(0, h.streak - 1),
-      }
-    }).sort((a, b) => b.streak - a.streak))
-  }, [])
+  // const handleToggle = useCallback((id: string) => {
+  //   setItems(prev => prev.map(h => {
+  //     if (h.id !== id) return h;
+  //     const completed = !h.isCompleted;
+  //     return {
+  //       ...h,
+  //       isCompleted: completed,
+  //       streak: completed ? h.streak + 1 : Math.max(0, h.streak - 1),
+  //     }
+  //   }).sort((a, b) => b.streak - a.streak))
+  // }, [])
 
   const onAddHabit = useCallback(() => {
     const title = nuevo.trim();
@@ -68,8 +76,18 @@ export default function HomeScreen() {
   const total = habits.length;
   const completed = useMemo(() => habits.filter(h => h.lastDoneAt).length, [habits]) // guarda en la memoria el resultado de la funcion
 
+  async function onToggleWithCelebration(item: HabitItem) {
+    const wasToday = item.lastDoneAt ?
+      isSameDay(item.lastDoneAt as unknown as Date, new Date()) : false;
+    toggleHabit(item.id);
+    if (!wasToday) {
+      const msg = await getMotivation("DanielDev", item.title);
+      celebrate(msg);
+    }
+  }
+
   const keyExtractor = useCallback((habit: Habit) => habit.id, [])
-  const renderItem = ({ item }: ListRenderItemInfo<any>) => {
+  const renderItem = ({ item }: ListRenderItemInfo<HabitItem>) => {
     const isToday = item.lastDoneAt
       ? new Date(item.lastDoneAt).toDateString() === new Date().toDateString()
       : false;
@@ -79,7 +97,7 @@ export default function HomeScreen() {
         streak={item.streak}
         isCompleted={isToday}
         priority={item.priority}
-        onToggle={() => toggleHabit(item.id)}
+        onToggle={() => onToggleWithCelebration(item)}
       />
     );
   };

@@ -1,4 +1,5 @@
 import { useThemeColor } from "@/hooks/use-theme-color";
+import { Priority } from "@/types/habits";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { ThemedText } from "./themed-text";
 
@@ -6,7 +7,7 @@ type Props = {
     title: string;
     streak: number;
     isCompleted?: boolean;
-    priority?: 'low' | 'medium' | 'high';
+    priority?: Priority;
     onToggle: () => void;
 }
 
@@ -29,7 +30,7 @@ export default function HabitCard({ title, streak, isCompleted = false, priority
     const success = useThemeColor({}, 'success');
     const border = useThemeColor({}, 'border');
 
-    const priorityColor = priorityColors[priority];
+    const priorityColor = priorityColors[priority as keyof typeof priorityColors];
     return (
         <Pressable onPress={onToggle} style={({ pressed }) => [styles.card, { backgroundColor: surface, opacity: pressed ? 0.96 : 1, borderColor: isCompleted ? success : border }]}>
             <View style={styles.row}>
